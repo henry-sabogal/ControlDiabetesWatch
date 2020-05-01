@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-class DevicesAdapter (private val devices: ArrayList<BluetoothDevice>, private val itemClickListener:OnItemClickListener): RecyclerView.Adapter<DevicesAdapter.DevicesViewHolder>(){
+class DevicesAdapter (private val devices: Set<BluetoothDevice>, private val itemClickListener:OnItemClickListener): RecyclerView.Adapter<DevicesAdapter.DevicesViewHolder>(){
 
     class DevicesViewHolder(val view: View): RecyclerView.ViewHolder(view){
         val name = view.findViewById(R.id.txtName) as TextView
@@ -30,9 +30,9 @@ class DevicesAdapter (private val devices: ArrayList<BluetoothDevice>, private v
     }
 
     override fun onBindViewHolder(holder: DevicesViewHolder, position: Int) {
-        holder.name.text = "Name: " + devices[position].name
-        holder.address.text = "Address: " + devices[position].address
-        holder.bind(devices[position], itemClickListener)
+        holder.name.text = "Name: " + devices.elementAt(position).name
+        holder.address.text = "Address: " + devices.elementAt(position).address
+        holder.bind(devices.elementAt(position), itemClickListener)
     }
 
     override fun getItemCount(): Int {

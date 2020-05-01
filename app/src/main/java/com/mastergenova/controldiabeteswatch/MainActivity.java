@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import me.aflak.bluetooth.Bluetooth;
 import me.aflak.bluetooth.interfaces.BluetoothCallback;
@@ -34,26 +35,15 @@ public class MainActivity extends WearableActivity {
     private ArrayList<String> addressList;
 
     BluetoothAdapter bluetoothAdapter;
+    Set<BluetoothDevice> pairedDevices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(bluetoothAdapter == null){
-            Toast.makeText(this,"Device doesn't support bluetooth", Toast.LENGTH_LONG).show();
-        }else{
-            if(!bluetoothAdapter.isEnabled()){
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, 1);
-            }else{
-                System.out.println("Bluetooht enable");
-            }
-        }
-
-       /* bluetooth = new Bluetooth(this);
-        bluetooth.setBluetoothCallback(bluetoothCallback);
+        //bluetooth = new Bluetooth(this);
+        //bluetooth.setBluetoothCallback(bluetoothCallback);
 
         recyclerView = (RecyclerView) findViewById(R.id.devices_recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -61,17 +51,9 @@ public class MainActivity extends WearableActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        devicesList = new ArrayList<BluetoothDevice>();
-        mAdapter = new DevicesAdapter(devicesList, new OnItemClickListener() {
-            @Override
-            public void onItemClick(BluetoothDevice item) {
-                System.out.println("Click on " + item.getName());
-                System.out.println("Click on device with address " +  item.getAddress());
-            }
-        });
-        recyclerView.setAdapter(mAdapter);
+        //devicesList = new ArrayList<BluetoothDevice>();
 
-        addressList = new ArrayList<String>();
+        /*addressList = new ArrayList<String>();
 
         Button btnScan = (Button)findViewById(R.id.button_scan);
         btnScan.setOnClickListener(new View.OnClickListener() {
@@ -87,6 +69,19 @@ public class MainActivity extends WearableActivity {
 
         // Enables Always-on
         setAmbientEnabled();
+
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(bluetoothAdapter == null){
+            Toast.makeText(this,"Device doesn't support bluetooth", Toast.LENGTH_LONG).show();
+        }else{
+            if(!bluetoothAdapter.isEnabled()){
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, 1);
+            }else{
+                System.out.println("Bluetooht enable");
+                checkPairedDevices();
+            }
+        }
     }
 
     @Override
@@ -119,6 +114,27 @@ public class MainActivity extends WearableActivity {
             }
         }
 
+    }
+
+    private void checkPairedDevices(){
+        pairedDevices = bluetoothAdapter.getBondedDevices();
+
+        if(pairedDevices.size() > 0){
+            for(BluetoothDevice device: pairedDevices){
+                String deviceName = device.getName();
+                String deviceHardwareAddress = device.getAddress();
+                System.out.println("Paired Device Name: " + deviceName);
+                System.out.println("Paired Device Address: " + deviceHardwareAddress);
+            }
+            mAdapter = new DevicesAdapter(pairedDevices, new OnItemClickListener() {
+                @Override
+                public void onItemClick(BluetoothDevice item) {
+                    System.out.println("Click on " + item.getName());
+                    System.out.println("Click on device with address " +  item.getAddress());
+                }
+            });
+            recyclerView.setAdapter(mAdapter);
+        }
     }
 
     /*private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
