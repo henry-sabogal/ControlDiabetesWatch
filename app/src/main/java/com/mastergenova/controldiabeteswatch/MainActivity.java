@@ -3,9 +3,11 @@ package com.mastergenova.controldiabeteswatch;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,8 +16,10 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 
 import me.aflak.bluetooth.Bluetooth;
 import me.aflak.bluetooth.interfaces.BluetoothCallback;
@@ -208,4 +212,45 @@ public class MainActivity extends WearableActivity {
 
 
     }*/
+
+    private class ConnectThread extends Thread{
+        private final BluetoothSocket mmSocket;
+        private final BluetoothDevice mmDevice;
+        private UUID MY_UUID;
+        private String TAG = "";
+
+        public ConnectThread(BluetoothDevice device){
+            BluetoothSocket tmp = null;
+            mmDevice = device;
+
+            try {
+                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+            }catch (IOException e){
+                Log.e(TAG, "Socket's create() method failed", e);
+            }
+        }
+
+        public void run(){
+            bluetoothAdapter.cancelDiscovery();
+            try{
+                mmSocket.connect();
+            }catch (IOException connectException){
+                try{
+                    mmSocket.close();
+                }catch (IOException closeException){
+                    Log.e(TAG, "Could not close the client socket", closeException);
+                }
+            }
+
+            //managemyconnectsocket
+        }
+
+        public void cancel(){
+            try{
+                mmSocket.close();
+            }catch (IOException e){
+                Log.e(TAG, "Could not close the client socket", e);
+            }
+        }
+    }
 }
