@@ -35,11 +35,10 @@ public class MainActivity extends WearableActivity {
     private RecyclerView.LayoutManager layoutManager;
 
 
-    private ArrayList<BluetoothDevice> devicesList;
-    private ArrayList<String> addressList;
-
     BluetoothAdapter bluetoothAdapter;
     Set<BluetoothDevice> pairedDevices;
+
+    public static String EXTRA_DEVICE_ADDRESS = "device_address";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +71,6 @@ public class MainActivity extends WearableActivity {
         });*/
 
         // Enables Always-on
-        setAmbientEnabled();
-
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(bluetoothAdapter == null){
             Toast.makeText(this,"Device doesn't support bluetooth", Toast.LENGTH_LONG).show();
@@ -86,6 +83,8 @@ public class MainActivity extends WearableActivity {
                 checkPairedDevices();
             }
         }
+        
+        setAmbientEnabled();
     }
 
     @Override
@@ -135,6 +134,10 @@ public class MainActivity extends WearableActivity {
                 public void onItemClick(BluetoothDevice item) {
                     System.out.println("Click on " + item.getName());
                     System.out.println("Click on device with address " +  item.getAddress());
+                    Intent intent = new Intent(MainActivity.this, SendDataActivity.class);
+                    intent.putExtra(EXTRA_DEVICE_ADDRESS, item.getAddress());
+                    setResult(Activity.RESULT_OK, intent);
+                    startActivity(intent);
                 }
             });
             recyclerView.setAdapter(mAdapter);
@@ -213,44 +216,4 @@ public class MainActivity extends WearableActivity {
 
     }*/
 
-    private class ConnectThread extends Thread{
-        private final BluetoothSocket mmSocket;
-        private final BluetoothDevice mmDevice;
-        private UUID MY_UUID;
-        private String TAG = "";
-
-        public ConnectThread(BluetoothDevice device){
-            BluetoothSocket tmp = null;
-            mmDevice = device;
-
-            try {
-                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-            }catch (IOException e){
-                Log.e(TAG, "Socket's create() method failed", e);
-            }
-        }
-
-        public void run(){
-            bluetoothAdapter.cancelDiscovery();
-            try{
-                mmSocket.connect();
-            }catch (IOException connectException){
-                try{
-                    mmSocket.close();
-                }catch (IOException closeException){
-                    Log.e(TAG, "Could not close the client socket", closeException);
-                }
-            }
-
-            //managemyconnectsocket
-        }
-
-        public void cancel(){
-            try{
-                mmSocket.close();
-            }catch (IOException e){
-                Log.e(TAG, "Could not close the client socket", e);
-            }
-        }
-    }
 }
