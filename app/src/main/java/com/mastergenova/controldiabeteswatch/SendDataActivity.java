@@ -2,7 +2,12 @@ package com.mastergenova.controldiabeteswatch;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,7 +17,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SendDataActivity extends WearableActivity {
+import java.util.List;
+
+public class SendDataActivity extends WearableActivity implements SensorEventListener {
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
@@ -33,7 +40,7 @@ public class SendDataActivity extends WearableActivity {
 
     private TextView mTextView;
 
-    private StringBuffer mOutStringBuffer;
+    private SensorManager sensorManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +72,13 @@ public class SendDataActivity extends WearableActivity {
                 }
             }
         });
+
+        sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        List<Sensor> deviceSensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+        for (Sensor s: deviceSensors){
+            System.out.println("Sensor type: " + s.getName());
+            System.out.println("Sensor type: " + s.getStringType());
+        }
 
         // Enables Always-on
         setAmbientEnabled();
@@ -100,9 +114,24 @@ public class SendDataActivity extends WearableActivity {
         }
     }
 
+    @Override
+    public final void onAccuracyChanged(Sensor sensor, int accuracy){
+        //Do something here if sensor accuracy changes
+    }
+
+    @Override
+    public final void onSensorChanged(SensorEvent event){
+        if(event.sensor.getType() == Sensor.TYPE_HEART_RATE){
+            System.out.println("Heart Rate " + (int)event.values[0]);
+        }else if(event.sensor.getType() == Sensor.TYPE_STEP_COUNTER){
+            System.out.println("Step Counter " + (int)event.values[0]);
+        }else{
+            System.out.println("Unknown Sensor Type");
+        }
+    }
+
     private void setupConnection(){
         mBluetoothService = new BluetoothService(this, mHandler);
-        mOutStringBuffer = new StringBuffer("");
     }
 
     private final Handler mHandler = new Handler(){
@@ -186,9 +215,6 @@ public class SendDataActivity extends WearableActivity {
             byte[] send = message.getBytes();
             System.out.println("Send Message Hello World");
             mBluetoothService.write(send);
-
-            mOutStringBuffer.setLength(0);
-
         }
     }
 }
