@@ -38,9 +38,12 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
 
     private BluetoothService mBluetoothService = null;
 
-    private TextView mTextView;
+    private TextView mHeartRateTextView;
+    private TextView mStepCounterTextView;
 
     private SensorManager sensorManager;
+    private Sensor mHeartRateSensor;
+    private Sensor mStepCountSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,9 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
         setContentView(R.layout.activity_send_data);
 
         Button btnSendData = (Button)findViewById(R.id.btnSendData);
+
+        mHeartRateTextView = (TextView)findViewById(R.id.txtHeartRate);
+        mStepCounterTextView = (TextView)findViewById(R.id.txtStepCounter);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -79,6 +85,11 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
             System.out.println("Sensor type: " + s.getName());
             System.out.println("Sensor type: " + s.getStringType());
         }
+        mHeartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+        mStepCountSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+
+        sensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, mStepCountSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         // Enables Always-on
         setAmbientEnabled();
@@ -123,8 +134,12 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
     public final void onSensorChanged(SensorEvent event){
         if(event.sensor.getType() == Sensor.TYPE_HEART_RATE){
             System.out.println("Heart Rate " + (int)event.values[0]);
+            mHeartRateTextView.setText("Heart Rate " + (int)event.values[0]);
+            sendMessage("HR:"+(int)event.values[0]);
         }else if(event.sensor.getType() == Sensor.TYPE_STEP_COUNTER){
             System.out.println("Step Counter " + (int)event.values[0]);
+            mStepCounterTextView.setText("Step Counter " + (int)event.values[0]);
+            sendMessage("SC:"+(int)event.values[0]);
         }else{
             System.out.println("Unknown Sensor Type");
         }

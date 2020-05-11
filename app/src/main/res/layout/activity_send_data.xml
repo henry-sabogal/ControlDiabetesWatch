@@ -9,11 +9,23 @@
     tools:context=".SendDataActivity"
     tools:deviceIds="wear">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/inner_frame_layout_padding"
-        app:boxedEdges="all">
+        android:padding="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtHeartRate"
+            android:textSize="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtStepCounter"
+            android:textSize="12dp" />
 
         <Button
             android:layout_width="match_parent"
@@ -22,5 +34,6 @@
             android:id="@+id/btnSendData"
             />
 
-    </FrameLayout>
+    </LinearLayout>
+
 </androidx.wear.widget.BoxInsetLayout>
