@@ -9,31 +9,46 @@
     tools:context=".SendDataActivity"
     tools:deviceIds="wear">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="5dp"
-        android:orientation="vertical">
+        app:boxedEdges="all">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtHeartRate"
+                android:textSize="12dp" />
+
+            <TextView
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtAcceloremeter"
+                android:textSize="12dp" />
+
+            <TextView
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtStepCounter"
+                android:textSize="12dp" />
+        </LinearLayout>
+
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txtHeartRate"
-            android:textSize="12dp" />
+            android:layout_gravity="bottom|left"
+            android:id="@+id/txtStatus"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/txtStepCounter"
-            android:textSize="12dp" />
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send Data"
-            android:id="@+id/btnSendData"
-            />
-
-    </LinearLayout>
+    </FrameLayout>
 
 </androidx.wear.widget.BoxInsetLayout>

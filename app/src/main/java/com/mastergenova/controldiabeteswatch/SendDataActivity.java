@@ -40,25 +40,34 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
 
     private TextView mHeartRateTextView;
     private TextView mStepCounterTextView;
+    private TextView mStatusTextView;
+    private TextView mAcceloremeterTextView;
 
     private SensorManager sensorManager;
     private Sensor mHeartRateSensor;
     private Sensor mStepCountSensor;
+    private Sensor mAccelerometerSensor;
+
+    private int heartRate = 0;
+    private int stepCounter = 0;
+    private int accelerometer = 0;
+
+    private String message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_data);
 
-        Button btnSendData = (Button)findViewById(R.id.btnSendData);
-
         mHeartRateTextView = (TextView)findViewById(R.id.txtHeartRate);
         mStepCounterTextView = (TextView)findViewById(R.id.txtStepCounter);
+        mStatusTextView = (TextView)findViewById(R.id.txtStatus);
+        mAcceloremeterTextView = (TextView)findViewById(R.id.txtAcceloremeter);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if(mBluetoothAdapter == null){
-            Toast.makeText(this,"Device doesn't support bluetooth", Toast.LENGTH_LONG).show();
+            mStatusTextView.setText("Device doesn't support bluetooth");
         }else{
             Intent intent = getIntent();
             mConnectedDeviceName = intent.getStringExtra(MainActivity.EXTRA_DEVICE_ADDRESS);
@@ -66,18 +75,6 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
             setupConnection();
             connectDevice(intent, true);
         }
-
-        btnSendData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mBluetoothService.getState() == BluetoothService.STATE_CONNECTED){
-                    String message = "Hola mundo";
-                    sendMessage(message);
-                }else{
-                    System.out.println("Bluetooth Not Connected");
-                }
-            }
-        });
 
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         List<Sensor> deviceSensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
@@ -87,9 +84,7 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
         }
         mHeartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
         mStepCountSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-
-        sensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, mStepCountSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mAccelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         // Enables Always-on
         setAmbientEnabled();
@@ -135,11 +130,21 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
         if(event.sensor.getType() == Sensor.TYPE_HEART_RATE){
             System.out.println("Heart Rate " + (int)event.values[0]);
             mHeartRateTextView.setText("Heart Rate " + (int)event.values[0]);
-            sendMessage("HR:"+(int)event.values[0]);
+            heartRate = (int)event.values[0];
+            message = heartRate+":"+stepCounter+":"+accelerometer;
+            sendMessage(message);
         }else if(event.sensor.getType() == Sensor.TYPE_STEP_COUNTER){
             System.out.println("Step Counter " + (int)event.values[0]);
             mStepCounterTextView.setText("Step Counter " + (int)event.values[0]);
-            sendMessage("SC:"+(int)event.values[0]);
+            stepCounter = (int)event.values[0];
+            message = heartRate+":"+stepCounter+":"+accelerometer;
+            sendMessage(message);
+        }else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            System.out.println("Accelerometer: "  + (int)event.values[0]);
+            mAcceloremeterTextView.setText("Accelerometer: "  + (int)event.values[0]);
+            accelerometer = (int)event.values[0];
+            message = heartRate+":"+stepCounter+":"+accelerometer;
+            sendMessage(message);
         }else{
             System.out.println("Unknown Sensor Type");
         }
@@ -158,15 +163,22 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
                     switch (msg.arg1){
                         case BluetoothService.STATE_CONNECTED:
                             System.out.println("Bluetooth state connected");
+                            sensorManager.registerListener(SendDataActivity.this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                            sensorManager.registerListener(SendDataActivity.this, mStepCountSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                            sensorManager.registerListener(SendDataActivity.this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                            mStatusTextView.setText("Status: Connected");
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             System.out.println("Bluetooth state connecting");
+                            mStatusTextView.setText("Status: Connecting");
                             break;
                         case BluetoothService.STATE_LISTEN:
                             System.out.println("Bluetooth state listen");
+                            mStatusTextView.setText("Status: Listen");
                             break;
                         case BluetoothService.STATE_NONE:
                             System.out.println("Bluetooth state none");
+                            mStatusTextView.setText("Status: None");
                             break;
                     }
                     break;
@@ -180,6 +192,7 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
                 case Constants.MESSAGE_DEVICE_NAME:
                     mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
                     System.out.println("Connected to " + mConnectedDeviceName);
+                    mStatusTextView.setText("Connected to " + mConnectedDeviceName);
                     break;
                 case Constants.MESSAGE_TOAST:
                     System.out.println("Message Toast " + msg.getData().getString(Constants.DEVICE_NAME));
@@ -208,7 +221,7 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
                     setupConnection();
                 }else {
                     System.out.println("BT not enabled");
-                    Toast.makeText(this, "BT not enabled", Toast.LENGTH_SHORT).show();
+                    mStatusTextView.setText("BT not enabled");
                 }
         }
     }
@@ -222,13 +235,12 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
 
     private void sendMessage(String message){
         if(mBluetoothService.getState() != BluetoothService.STATE_CONNECTED){
-            Toast.makeText(this, "Not Connected", Toast.LENGTH_SHORT).show();
+            mStatusTextView.setText("Status: Not Connected");
             return;
         }
 
         if(message.length() > 0){
             byte[] send = message.getBytes();
-            System.out.println("Send Message Hello World");
             mBluetoothService.write(send);
         }
     }
