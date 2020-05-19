@@ -7,4 +7,5 @@
     <string name="hello_world">Hello Square World!</string>
     <string name="button_scan">Scan for devices</string>
     <string name="activity_send_data">SendDataActivity</string>
+    <string name="title_activity_splash_screen">SplashScreenActivity</string>
 </resources>
