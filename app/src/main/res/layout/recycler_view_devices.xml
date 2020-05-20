@@ -4,12 +4,22 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_perm_device_information_black_24"
+        android:layout_gravity="center"
+        android:tint="@color/colorPrimaryDark" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="12dp"
         android:text="Name"
+        android:textColor="@color/colorPrimaryDark"
+        android:layout_gravity="center"
+        android:textAlignment="center"
         android:id="@+id/txtName" />
 
     <TextView
@@ -18,5 +28,7 @@
         android:textStyle="italic"
         android:textSize="12dp"
         android:text="Address"
+        android:textColor="@color/colorPrimaryDark"
+        android:textAlignment="center"
         android:id="@+id/txtAddress" />
 </LinearLayout>

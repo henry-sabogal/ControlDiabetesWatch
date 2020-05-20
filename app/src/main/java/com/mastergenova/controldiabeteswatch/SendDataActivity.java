@@ -12,10 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.activity.WearableActivity;
-import android.view.View;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -54,6 +52,8 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
 
     private String message;
 
+    private ImageView mBluetoothIcon;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,10 +64,13 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
         mStatusTextView = (TextView)findViewById(R.id.txtStatus);
         mAcceloremeterTextView = (TextView)findViewById(R.id.txtAcceloremeter);
 
+        mBluetoothIcon = (ImageView)findViewById(R.id.menuIcon4);
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if(mBluetoothAdapter == null){
             mStatusTextView.setText("Device doesn't support bluetooth");
+            mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_disabled_black_24);
         }else{
             Intent intent = getIntent();
             mConnectedDeviceName = intent.getStringExtra(MainActivity.EXTRA_DEVICE_ADDRESS);
@@ -167,18 +170,22 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
                             sensorManager.registerListener(SendDataActivity.this, mStepCountSensor, SensorManager.SENSOR_DELAY_NORMAL);
                             sensorManager.registerListener(SendDataActivity.this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
                             mStatusTextView.setText("Status: Connected");
+                            mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_connected_black_24);
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             System.out.println("Bluetooth state connecting");
                             mStatusTextView.setText("Status: Connecting");
+                            mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_searching_black_24);
                             break;
                         case BluetoothService.STATE_LISTEN:
                             System.out.println("Bluetooth state listen");
                             mStatusTextView.setText("Status: Listen");
+                            mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_searching_black_24);
                             break;
                         case BluetoothService.STATE_NONE:
                             System.out.println("Bluetooth state none");
                             mStatusTextView.setText("Status: None");
+                            mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_black_24);
                             break;
                     }
                     break;
@@ -193,6 +200,7 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
                     mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
                     System.out.println("Connected to " + mConnectedDeviceName);
                     mStatusTextView.setText("Connected to " + mConnectedDeviceName);
+                    mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_connected_black_24);
                     break;
                 case Constants.MESSAGE_TOAST:
                     System.out.println("Message Toast " + msg.getData().getString(Constants.DEVICE_NAME));
@@ -222,6 +230,7 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
                 }else {
                     System.out.println("BT not enabled");
                     mStatusTextView.setText("BT not enabled");
+                    mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_disabled_black_24);
                 }
         }
     }
@@ -236,6 +245,7 @@ public class SendDataActivity extends WearableActivity implements SensorEventLis
     private void sendMessage(String message){
         if(mBluetoothService.getState() != BluetoothService.STATE_CONNECTED){
             mStatusTextView.setText("Status: Not Connected");
+            mBluetoothIcon.setImageResource(R.drawable.baseline_bluetooth_disabled_black_24);
             return;
         }
 
